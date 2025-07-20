@@ -27,7 +27,6 @@ function CompactGui.new(titleText)
 	mainFrame.Draggable = true
 	mainFrame.ClipsDescendants = false
 	mainFrame.Parent = screenGui
-
 	Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 
 	-- Titlebar
@@ -36,7 +35,6 @@ function CompactGui.new(titleText)
 	titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 	titleBar.BorderSizePixel = 0
 	titleBar.Parent = mainFrame
-
 	Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 12)
 
 	local title = Instance.new("TextLabel")
@@ -62,7 +60,6 @@ function CompactGui.new(titleText)
 	closeButton.BorderSizePixel = 0
 	closeButton.Parent = titleBar
 	Instance.new("UICorner", closeButton).CornerRadius = UDim.new(1, 0)
-
 	closeButton.MouseButton1Click:Connect(function()
 		screenGui:Destroy()
 	end)
@@ -79,7 +76,6 @@ function CompactGui.new(titleText)
 	minimizeButton.BorderSizePixel = 0
 	minimizeButton.Parent = titleBar
 	Instance.new("UICorner", minimizeButton).CornerRadius = UDim.new(1, 0)
-
 	minimizeButton.MouseButton1Click:Connect(function()
 		mainFrame.Visible = not mainFrame.Visible
 	end)
@@ -93,7 +89,6 @@ function CompactGui.new(titleText)
 	tabHolder.BorderSizePixel = 0
 	tabHolder.Parent = mainFrame
 	Instance.new("UICorner", tabHolder).CornerRadius = UDim.new(0, 12)
-
 	local tabLayout = Instance.new("UIListLayout", tabHolder)
 	tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	tabLayout.Padding = UDim.new(0, 6)
@@ -107,17 +102,14 @@ function CompactGui.new(titleText)
 	buttonArea.BorderSizePixel = 0
 	buttonArea.Parent = mainFrame
 	Instance.new("UICorner", buttonArea).CornerRadius = UDim.new(0, 12)
-
 	local buttonLayout = Instance.new("UIListLayout", buttonArea)
 	buttonLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	buttonLayout.Padding = UDim.new(0, 6)
 
-	-- Expose references
 	self.TabHolder = tabHolder
 	self.ButtonArea = buttonArea
 	self.MainFrame = mainFrame
 
-	-- AddTab function: callback runs when tab clicked
 	function self:AddTab(name, callback)
 		local tabButton = Instance.new("TextButton")
 		tabButton.Size = UDim2.new(1, -10, 0, 30)
@@ -131,13 +123,18 @@ function CompactGui.new(titleText)
 		Instance.new("UICorner", tabButton).CornerRadius = UDim.new(1, 0)
 
 		tabButton.MouseButton1Click:Connect(function()
+			-- Clear buttons first
+			for _, btn in pairs(buttonArea:GetChildren()) do
+				if btn:IsA("TextButton") then
+					btn:Destroy()
+				end
+			end
 			pcall(callback)
 		end)
 
 		return tabButton
 	end
 
-	-- AddButton function
 	function self:AddButton(text, callback)
 		local button = Instance.new("TextButton")
 		button.Size = UDim2.new(1, -10, 0, 30)
