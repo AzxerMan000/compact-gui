@@ -66,5 +66,14 @@ tab1:AddToggle("Example", function(state)
 end)
 
 ```
+---
+
+## Adding Submit button
 
 
+```lua
+
+tab1:AddSubmit("example", function(text)
+    print("You submitted:", text)
+end)
+```
