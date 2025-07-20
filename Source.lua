@@ -5,10 +5,9 @@ CompactGui.__index = CompactGui
 function CompactGui.new(titleText)
 	local self = setmetatable({}, CompactGui)
 
-	local CoreGui = game:GetService("CoreGui")
 	local Players = game:GetService("Players")
 	local Player = Players.LocalPlayer
-	local PlayerGui = Player:FindFirstChild("PlayerGui") or CoreGui
+	local PlayerGui = Player:WaitForChild("PlayerGui")
 
 	-- ScreenGui
 	local screenGui = Instance.new("ScreenGui")
@@ -21,26 +20,15 @@ function CompactGui.new(titleText)
 	mainFrame.Name = "MainFrame"
 	mainFrame.Size = UDim2.new(0, 400, 0, 300)
 	mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+	mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 	mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 	mainFrame.BorderSizePixel = 0
 	mainFrame.Active = true
 	mainFrame.Draggable = true
-	mainFrame.ClipsDescendants = true
-	mainFrame.Parent = screenGui
-	mainFrame.BackgroundTransparency = 0
-	mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-	mainFrame.Visible = true
-	mainFrame.ZIndex = 1
-	mainFrame.AutomaticSize = Enum.AutomaticSize.Y
-	mainFrame.SizeConstraint = Enum.SizeConstraint.RelativeXY
 	mainFrame.ClipsDescendants = false
-	mainFrame.BorderMode = Enum.BorderMode.Outline
-	mainFrame.BackgroundTransparency = 0
-	mainFrame:SetAttribute("Minimized", false)
+	mainFrame.Parent = screenGui
 
-	-- UICorner
-	local corner = Instance.new("UICorner", mainFrame)
-	corner.CornerRadius = UDim.new(0, 12)
+	Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 
 	-- Titlebar
 	local titleBar = Instance.new("Frame")
@@ -93,11 +81,10 @@ function CompactGui.new(titleText)
 	Instance.new("UICorner", minimizeButton).CornerRadius = UDim.new(1, 0)
 
 	minimizeButton.MouseButton1Click:Connect(function()
-		mainFrame.Visible = not mainFrame:GetAttribute("Minimized")
-		mainFrame:SetAttribute("Minimized", not mainFrame:GetAttribute("Minimized"))
+		mainFrame.Visible = not mainFrame.Visible
 	end)
 
-	-- Tab holder (Left side)
+	-- Tab Holder (left)
 	local tabHolder = Instance.new("Frame")
 	tabHolder.Name = "TabHolder"
 	tabHolder.Size = UDim2.new(0, 100, 1, -35)
@@ -111,7 +98,7 @@ function CompactGui.new(titleText)
 	tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	tabLayout.Padding = UDim.new(0, 6)
 
-	-- Button Area (Right side)
+	-- Button Area (right)
 	local buttonArea = Instance.new("Frame")
 	buttonArea.Name = "ButtonArea"
 	buttonArea.Size = UDim2.new(1, -110, 1, -45)
@@ -125,7 +112,12 @@ function CompactGui.new(titleText)
 	buttonLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	buttonLayout.Padding = UDim.new(0, 6)
 
-	-- AddTab function
+	-- Expose references
+	self.TabHolder = tabHolder
+	self.ButtonArea = buttonArea
+	self.MainFrame = mainFrame
+
+	-- AddTab function: callback runs when tab clicked
 	function self:AddTab(name, callback)
 		local tabButton = Instance.new("TextButton")
 		tabButton.Size = UDim2.new(1, -10, 0, 30)
