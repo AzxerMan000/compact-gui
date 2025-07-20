@@ -5,64 +5,77 @@ compactGui.__index = compactGui
 function compactGui.new(title)
     local self = setmetatable({}, compactGui)
 
-    local screenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "CompactGui"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = game:GetService("CoreGui")
 
-    local mainFrame = Instance.new("Frame", screenGui)
+    local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(0, 350, 0, 300)
     mainFrame.Position = UDim2.new(0.5, -175, 0.5, -150)
     mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     mainFrame.BorderSizePixel = 0
     mainFrame.Active = true
     mainFrame.Draggable = true
+    mainFrame.Parent = screenGui
 
-    local titleLabel = Instance.new("TextLabel", mainFrame)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = mainFrame
+
+    local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(1, 0, 0, 30)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Text = title or "Compact GUI"
     titleLabel.Font = Enum.Font.SourceSansBold
     titleLabel.TextSize = 18
     titleLabel.TextColor3 = Color3.new(1, 1, 1)
+    titleLabel.Parent = mainFrame
 
-    -- Tabs container (left side)
-    local tabsFrame = Instance.new("Frame", mainFrame)
+    local tabsFrame = Instance.new("Frame")
     tabsFrame.Size = UDim2.new(0, 100, 1, -40)
     tabsFrame.Position = UDim2.new(0, 0, 0, 40)
     tabsFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     tabsFrame.BorderSizePixel = 0
+    tabsFrame.Parent = mainFrame
 
-    local tabsLayout = Instance.new("UIListLayout", tabsFrame)
+    local tabCorner = corner:Clone()
+    tabCorner.Parent = tabsFrame
+
+    local tabsLayout = Instance.new("UIListLayout")
     tabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
     tabsLayout.Padding = UDim.new(0, 5)
     tabsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     tabsLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+    tabsLayout.Parent = tabsFrame
 
-    -- Pages container (right side)
-    local pagesFrame = Instance.new("Frame", mainFrame)
+    local pagesFrame = Instance.new("Frame")
     pagesFrame.Size = UDim2.new(1, -110, 1, -40)
     pagesFrame.Position = UDim2.new(0, 110, 0, 40)
     pagesFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     pagesFrame.BorderSizePixel = 0
     pagesFrame.ClipsDescendants = true
+    pagesFrame.Parent = mainFrame
 
-    local pagesLayout = Instance.new("UIListLayout", pagesFrame)
+    local pageCorner = corner:Clone()
+    pageCorner.Parent = pagesFrame
+
+    local pagesLayout = Instance.new("UIListLayout")
     pagesLayout.SortOrder = Enum.SortOrder.LayoutOrder
     pagesLayout.Padding = UDim.new(0, 5)
+    pagesLayout.Parent = pagesFrame
 
-    -- Store tabs and pages
     self.ScreenGui = screenGui
     self.MainFrame = mainFrame
     self.TitleLabel = titleLabel
     self.TabsFrame = tabsFrame
     self.PagesFrame = pagesFrame
-
     self.Tabs = {}
     self.Pages = {}
 
     return self
 end
 
--- Helper to hide all pages
 function compactGui:HideAllPages()
     for _, page in pairs(self.Pages) do
         page.Visible = false
@@ -73,12 +86,10 @@ function compactGui:HideAllPages()
     end
 end
 
--- Create a new tab with empty page
 function compactGui:CreateTab(tabName)
     local tabIndex = #self.Tabs + 1
 
-    -- Create tab button
-    local tabButton = Instance.new("TextButton", self.TabsFrame)
+    local tabButton = Instance.new("TextButton")
     tabButton.Size = UDim2.new(1, -10, 0, 30)
     tabButton.Text = tabName or ("Tab " .. tabIndex)
     tabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
@@ -87,28 +98,33 @@ function compactGui:CreateTab(tabName)
     tabButton.TextSize = 16
     tabButton.BorderSizePixel = 0
     tabButton.AutoButtonColor = false
+    tabButton.Parent = self.TabsFrame
 
-    -- Create page frame for this tab
-    local pageFrame = Instance.new("ScrollingFrame", self.PagesFrame)
+    local tabCorner = Instance.new("UICorner")
+    tabCorner.CornerRadius = UDim.new(0, 6)
+    tabCorner.Parent = tabButton
+
+    local pageFrame = Instance.new("ScrollingFrame")
     pageFrame.Size = UDim2.new(1, 0, 1, 0)
     pageFrame.BackgroundTransparency = 1
     pageFrame.ScrollBarThickness = 6
     pageFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     pageFrame.Visible = false
     pageFrame.BorderSizePixel = 0
+    pageFrame.Parent = self.PagesFrame
 
-    local layout = Instance.new("UIListLayout", pageFrame)
+    local layout = Instance.new("UIListLayout")
     layout.SortOrder = Enum.SortOrder.LayoutOrder
     layout.Padding = UDim.new(0, 8)
+    layout.Parent = pageFrame
+
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         pageFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
     end)
 
-    -- Store tab and page
     self.Tabs[tabIndex] = tabButton
     self.Pages[tabIndex] = pageFrame
 
-    -- Tab button click: show this page, hide others
     tabButton.MouseButton1Click:Connect(function()
         self:HideAllPages()
         pageFrame.Visible = true
@@ -116,16 +132,14 @@ function compactGui:CreateTab(tabName)
         tabButton.TextColor3 = Color3.fromRGB(0, 1, 0)
     end)
 
-    -- If first tab, select it automatically
     if tabIndex == 1 then
         tabButton:MouseButton1Click()
     end
 
-    -- Return a small API for adding controls to this page:
     local tabApi = {}
 
     function tabApi:AddButton(text, callback)
-        local button = Instance.new("TextButton", pageFrame)
+        local button = Instance.new("TextButton")
         button.Size = UDim2.new(1, -20, 0, 30)
         button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         button.TextColor3 = Color3.new(1, 1, 1)
@@ -133,6 +147,11 @@ function compactGui:CreateTab(tabName)
         button.TextSize = 16
         button.Text = text or "Button"
         button.BorderSizePixel = 0
+        button.Parent = pageFrame
+
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 6)
+        btnCorner.Parent = button
 
         button.MouseButton1Click:Connect(function()
             pcall(callback)
@@ -142,12 +161,13 @@ function compactGui:CreateTab(tabName)
     end
 
     function tabApi:AddSubmit(placeholderText, callback)
-        local frame = Instance.new("Frame", pageFrame)
+        local frame = Instance.new("Frame")
         frame.Size = UDim2.new(1, -20, 0, 30)
         frame.BackgroundTransparency = 1
         frame.BorderSizePixel = 0
+        frame.Parent = pageFrame
 
-        local textBox = Instance.new("TextBox", frame)
+        local textBox = Instance.new("TextBox")
         textBox.Size = UDim2.new(0.7, 0, 1, 0)
         textBox.Position = UDim2.new(0, 0, 0, 0)
         textBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
@@ -155,8 +175,9 @@ function compactGui:CreateTab(tabName)
         textBox.TextSize = 14
         textBox.Font = Enum.Font.SourceSans
         textBox.PlaceholderText = placeholderText or "Enter text"
+        textBox.Parent = frame
 
-        local submitBtn = Instance.new("TextButton", frame)
+        local submitBtn = Instance.new("TextButton")
         submitBtn.Size = UDim2.new(0.3, 0, 1, 0)
         submitBtn.Position = UDim2.new(0.7, 0, 0, 0)
         submitBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -165,6 +186,11 @@ function compactGui:CreateTab(tabName)
         submitBtn.Font = Enum.Font.SourceSans
         submitBtn.Text = "Submit"
         submitBtn.BorderSizePixel = 0
+        submitBtn.Parent = frame
+
+        local submitCorner = Instance.new("UICorner")
+        submitCorner.CornerRadius = UDim.new(0, 6)
+        submitCorner.Parent = submitBtn
 
         submitBtn.MouseButton1Click:Connect(function()
             pcall(callback, textBox.Text)
@@ -174,12 +200,13 @@ function compactGui:CreateTab(tabName)
     end
 
     function tabApi:AddToggle(text, callback)
-        local frame = Instance.new("Frame", pageFrame)
+        local frame = Instance.new("Frame")
         frame.Size = UDim2.new(1, -20, 0, 30)
         frame.BackgroundTransparency = 1
         frame.BorderSizePixel = 0
+        frame.Parent = pageFrame
 
-        local label = Instance.new("TextLabel", frame)
+        local label = Instance.new("TextLabel")
         label.Size = UDim2.new(0.7, 0, 1, 0)
         label.Position = UDim2.new(0, 0, 0, 0)
         label.BackgroundTransparency = 1
@@ -188,8 +215,9 @@ function compactGui:CreateTab(tabName)
         label.TextSize = 16
         label.TextColor3 = Color3.new(1, 1, 1)
         label.TextXAlignment = Enum.TextXAlignment.Left
+        label.Parent = frame
 
-        local toggleBtn = Instance.new("TextButton", frame)
+        local toggleBtn = Instance.new("TextButton")
         toggleBtn.Size = UDim2.new(0.3, 0, 1, 0)
         toggleBtn.Position = UDim2.new(0.7, 0, 0, 0)
         toggleBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -198,6 +226,11 @@ function compactGui:CreateTab(tabName)
         toggleBtn.Font = Enum.Font.SourceSans
         toggleBtn.Text = "OFF"
         toggleBtn.BorderSizePixel = 0
+        toggleBtn.Parent = frame
+
+        local toggleCorner = Instance.new("UICorner")
+        toggleCorner.CornerRadius = UDim.new(0, 6)
+        toggleCorner.Parent = toggleBtn
 
         local toggled = false
         toggleBtn.MouseButton1Click:Connect(function()
