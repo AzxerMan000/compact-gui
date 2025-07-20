@@ -8,7 +8,7 @@
 
 ```lua
 
-local compactGui = loadstring(game:HttpGet("https://raw.githubusercontent.com/AzxerMan000/compact-gui/refs/heads/main/Source.lua"))()
+local CompactGui = loadstring(game:HttpGet("https://raw.githubusercontent.com/AzxerMan000/compact-gui/refs/heads/main/Source.lua"))()
 
 
 ```
