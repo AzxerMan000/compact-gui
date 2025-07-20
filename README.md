@@ -60,7 +60,7 @@ end)
 
 ```lua
 
-tabq:AddToggle("Example", function(state)
+tab1:AddToggle("Example", function(state)
     print("Toggled:", state)
    -- put your functions here
 end)
